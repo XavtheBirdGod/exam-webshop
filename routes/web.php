@@ -3,9 +3,18 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Seller\ProductController;
 
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+
 Route::get('/', function () {
     return view('pages.home');
 })->name('home');
+
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login')->middleware('guest');
+Route::post('/login', [LoginController::class, 'login'])->middleware('guest');
+Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register')->middleware('guest');
+Route::post('/register', [RegisterController::class, 'register'])->middleware('guest');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
 Route::get('/shop', function () {
     return view('pages.shop');
@@ -27,9 +36,14 @@ Route::get('/cart', function () {
     return view('pages.shop'); // Placeholder for now
 })->name('cart');
 
+use App\Http\Controllers\ProfileController;
+
 Route::get('/account', function () {
-    return view('pages.shop'); // Placeholder for now
-})->name('account');
+    $orders = auth()->user()->orders()->with('items.product')->latest()->get();
+    return view('pages.account', compact('orders'));
+})->name('account')->middleware('auth');
+
+Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update')->middleware('auth');
 
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::resource('products', ProductController::class);

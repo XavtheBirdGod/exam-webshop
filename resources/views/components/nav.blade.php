@@ -23,9 +23,39 @@
 
         <!-- Right: Utility & Cart -->
         <div class="flex justify-end items-center gap-8">
-            <a href="/account" class="font-accent text-[10px] uppercase tracking-[0.3em] text-muted-text hover:text-warm-text hidden sm:block">
-                Account
-            </a>
+            @auth
+                <div class="relative group/account">
+                    <button class="font-accent text-[10px] uppercase tracking-[0.3em] text-warm-text flex items-center gap-2">
+                        Account
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-300 group-hover/account:rotate-180"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div class="absolute right-0 top-full pt-4 opacity-0 invisible group-hover/account:opacity-100 group-hover/account:visible transition-all duration-300 translate-y-2 group-hover/account:translate-y-0">
+                        <div class="bg-deep-black border border-white/10 p-6 min-w-[200px] shadow-2xl">
+                            <div class="mb-4 pb-4 border-b border-white/5">
+                                <p class="font-accent text-[8px] uppercase tracking-widest text-muted-text mb-1">Status</p>
+                                <p class="font-display text-sm text-gold">Soulmate Level {{ auth()->user()->soulmate_level }}</p>
+                            </div>
+                            <ul class="space-y-4">
+                                <li>
+                                    <a href="{{ route('account') }}" class="font-accent text-[10px] uppercase tracking-[0.2em] text-muted-text hover:text-warm-text transition-colors">My Profile</a>
+                                </li>
+                                <li>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="font-accent text-[10px] uppercase tracking-[0.2em] text-muted-text hover:text-terracotta transition-colors">
+                                            Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <a href="{{ route('login') }}" class="font-accent text-[10px] uppercase tracking-[0.3em] text-muted-text hover:text-warm-text hidden sm:block">
+                    Login
+                </a>
+            @endauth
             <a href="/cart" class="relative group flex items-center">
                 <span class="font-accent text-[10px] uppercase tracking-[0.3em] text-warm-text mr-3">Bag</span>
                 <div class="relative">

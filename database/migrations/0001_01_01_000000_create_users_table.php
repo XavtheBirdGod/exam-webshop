@@ -18,7 +18,12 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
 
+            // Custom fields
             $table->string('role')->default('customer'); // admin, seller, customer
+            $table->string('phone_number')->nullable();
+            $table->text('shipping_address')->nullable();
+            $table->date('birthday')->nullable();
+            $table->integer('soulmate_level')->default(1);
 
             $table->rememberToken();
             $table->timestamps();
