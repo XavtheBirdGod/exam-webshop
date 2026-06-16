@@ -25,18 +25,6 @@ class UserSeeder extends Seeder
             'soulmate_level' => 3,
         ]);
 
-        // Dummy Seller
-        User::create([
-            'name' => 'Seller User',
-            'email' => 'seller@example.com',
-            'password' => Hash::make('password'),
-            'role' => 'seller',
-            'phone_number' => '+31 6 87654321',
-            'shipping_address' => 'Keizersgracht 123, Amsterdam',
-            'birthday' => '1985-05-15',
-            'soulmate_level' => 2,
-        ]);
-
         // Dummy Customer
         User::create([
             'name' => 'Customer User',

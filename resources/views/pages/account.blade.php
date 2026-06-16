@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<section class="pt-32 pb-20 px-4">
+<section class="pt-40 pb-20 px-4">
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
         <div class="text-center mb-20">
@@ -11,7 +11,17 @@
             </p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12" x-data="{ activeTab: 'status' }">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12" 
+             x-data="{ 
+                activeTab: '{{ request()->get('tab', 'status') }}',
+                switchTab(tab) {
+                    this.activeTab = tab;
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('tab', tab);
+                    window.history.pushState({tab: tab}, '', url);
+                }
+             }"
+             @popstate.window="activeTab = $event.state?.tab || 'status'">
             <!-- Sidebar / Status -->
             <div class="lg:col-span-1 space-y-8">
                 <div class="bg-white/5 border border-white/10 p-10 relative overflow-hidden group">
@@ -39,15 +49,21 @@
                 </div>
 
                 <div class="space-y-4">
-                    <button @click="activeTab = 'status'" :class="activeTab === 'status' ? 'border-gold/50 bg-white/[0.02]' : 'border-white/5'" class="w-full text-left p-6 border hover:border-gold/30 transition-all duration-300 group">
+                    <button @click="switchTab('status')" :class="activeTab === 'status' ? 'border-gold/50 bg-white/[0.02]' : 'border-white/5'" class="w-full text-left p-6 border hover:border-gold/30 transition-all duration-300 group">
                         <p class="font-accent text-[10px] uppercase tracking-[0.2em]" :class="activeTab === 'status' ? 'text-gold' : 'text-muted-text'">Member Status</p>
                     </button>
-                    <button @click="activeTab = 'details'" :class="activeTab === 'details' ? 'border-gold/50 bg-white/[0.02]' : 'border-white/5'" class="w-full text-left p-6 border hover:border-gold/30 transition-all duration-300 group">
+                    <button @click="switchTab('details')" :class="activeTab === 'details' ? 'border-gold/50 bg-white/[0.02]' : 'border-white/5'" class="w-full text-left p-6 border hover:border-gold/30 transition-all duration-300 group">
                         <p class="font-accent text-[10px] uppercase tracking-[0.2em]" :class="activeTab === 'details' ? 'text-gold' : 'text-muted-text'">Personal Details</p>
                     </button>
-                    <button @click="activeTab = 'orders'" :class="activeTab === 'orders' ? 'border-gold/50 bg-white/[0.02]' : 'border-white/5'" class="w-full text-left p-6 border hover:border-gold/30 transition-all duration-300 group">
+                    <button @click="switchTab('orders')" :class="activeTab === 'orders' ? 'border-gold/50 bg-white/[0.02]' : 'border-white/5'" class="w-full text-left p-6 border hover:border-gold/30 transition-all duration-300 group">
                         <p class="font-accent text-[10px] uppercase tracking-[0.2em]" :class="activeTab === 'orders' ? 'text-gold' : 'text-muted-text'">Order History</p>
                     </button>
+
+                    @if(auth()->user()->isAdmin())
+                        <a href="{{ route('admin.dashboard') }}" class="block w-full text-left p-6 border border-terracotta/20 hover:border-terracotta/50 transition-all duration-300 group bg-terracotta/[0.02]">
+                            <p class="font-accent text-[10px] uppercase tracking-[0.2em] text-terracotta/80 group-hover:text-terracotta">Admin Dashboard</p>
+                        </a>
+                    @endif
                 </div>
             </div>
 

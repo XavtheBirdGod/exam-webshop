@@ -1,3 +1,20 @@
+@import "tailwindcss";
+
+@theme {
+    --color-deep-black: #0f0f0f;
+    --color-warm-text: #e8e4df;
+    --color-muted-text: #9a9590;
+    --color-warm-accent: #d4a574;
+    --color-soft-pink: #e8b4b8;
+    --color-gold: #c9b896;
+    --color-terracotta: #c4856a;
+
+    --font-display: "Cormorant Garamond", serif;
+    --font-body: "Cormorant Garamond", serif;
+    --font-accent: "IBM Plex Sans", sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 6px;

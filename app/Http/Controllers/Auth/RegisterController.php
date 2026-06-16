@@ -33,6 +33,7 @@ class RegisterController extends Controller
             'role' => 'customer', // Default role
             'phone_number' => $request->phone_number,
             'birthday' => $request->birthday,
+            'tenant_id' => tenant('id'),
         ]);
 
         Auth::login($user);

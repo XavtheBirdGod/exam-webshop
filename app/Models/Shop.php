@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Shop extends Model
 {
+    protected $connection = 'central';
     protected $fillable = ['user_id', 'name', 'description', 'slug'];
 
     public function user() {

@@ -6,45 +6,34 @@ use App\Http\Controllers\Seller\ProductController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 
-Route::get('/', function () {
-    return view('pages.home');
-})->name('home');
+foreach (config('tenancy.central_domains', []) as $domain) {
+    Route::domain($domain)->group(function () {
+        Route::get('/', function () {
+            $tenants = \App\Models\Tenant::with('domains')->get();
+            return view('pages.home', compact('tenants'));
+        })->name('home');
 
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login')->middleware('guest');
-Route::post('/login', [LoginController::class, 'login'])->middleware('guest');
-Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register')->middleware('guest');
-Route::post('/register', [RegisterController::class, 'register'])->middleware('guest');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
+        Route::get('/contact', function () { return view('pages.contact'); })->name('contact');
+        Route::get('/careers', function () { return view('pages.careers'); })->name('careers');
+        Route::get('/careers/{slug}', function ($slug) {
+            $jobs = [
+                'retail-excellence-manager' => ['title' => 'Retail Excellence Manager', 'dept' => 'Retail', 'location' => 'Amsterdam, NL'],
+                'digital-experience-designer' => ['title' => 'Digital Experience Designer', 'dept' => 'E-Commerce', 'location' => 'Amsterdam, NL'],
+                'fragrance-specialist' => ['title' => 'Fragrance Specialist', 'dept' => 'Product Development', 'location' => 'Paris, FR'],
+                'sustainability-lead' => ['title' => 'Sustainability Lead', 'dept' => 'Corporate Social Responsibility', 'location' => 'London, UK'],
+            ];
 
-Route::get('/shop', function () {
-    return view('pages.shop');
-})->name('shop');
+            $job = $jobs[$slug] ?? abort(404);
+            return view('pages.job-detail', compact('job'));
+        })->name('careers.show');
+        Route::get('/privacy', function () { return view('pages.privacy'); })->name('privacy');
+        Route::get('/terms', function () { return view('pages.terms'); })->name('terms');
 
-Route::get('/collections', function () {
-    return view('pages.collections');
-})->name('collections');
+        // Auth Routes for Central Domain
+        Route::get('/login', [\App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login')->middleware('guest');
+        Route::post('/login', [\App\Http\Controllers\Auth\LoginController::class, 'login'])->middleware('guest');
+        Route::match(['get', 'post'], '/logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
+    });
+}
 
-Route::get('/sustainability', function () {
-    return view('pages.sustainability');
-})->name('sustainability');
 
-Route::get('/product/{id}', function ($id) {
-    return view('pages.product-detail');
-})->name('product.detail');
-
-Route::get('/cart', function () {
-    return view('pages.shop'); // Placeholder for now
-})->name('cart');
-
-use App\Http\Controllers\ProfileController;
-
-Route::get('/account', function () {
-    $orders = auth()->user()->orders()->with('items.product')->latest()->get();
-    return view('pages.account', compact('orders'));
-})->name('account')->middleware('auth');
-
-Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update')->middleware('auth');
-
-Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
-    Route::resource('products', ProductController::class);
-});

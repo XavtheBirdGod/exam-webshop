@@ -7,12 +7,12 @@
             <div class="lg:col-span-7 reveal">
                 <div class="sticky top-40 space-y-8">
                     <div class="aspect-[4/5] rounded-[48%] overflow-hidden bg-[#161615] border border-muted-text/10 shadow-2xl group">
-                        <img src="https://images.unsplash.com/photo-1616489953149-808607147983?q=80&w=1200" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000">
+                        <img src="{{ $product->image_url }}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000">
                     </div>
                     <div class="grid grid-cols-3 gap-6 px-12">
                         <div class="aspect-square rounded-full border border-gold/20 flex flex-col items-center justify-center italic font-display text-gold text-[10px] text-center p-4">
-                            <span class="block mb-1">Scented</span>
-                            <span class="font-bold text-xs">Bamboo</span>
+                            <span class="block mb-1">Authentic</span>
+                            <span class="font-bold text-xs">Rituals</span>
                         </div>
                         <div class="aspect-square rounded-full border border-gold/20 flex flex-col items-center justify-center italic font-display text-gold text-[10px] text-center p-4">
                             <span class="block mb-1">Soulful</span>
@@ -20,7 +20,7 @@
                         </div>
                         <div class="aspect-square rounded-full border border-gold/20 flex flex-col items-center justify-center italic font-display text-gold text-[10px] text-center p-4">
                             <span class="block mb-1">Deep</span>
-                            <span class="font-bold text-xs">Relaxation</span>
+                            <span class="font-bold text-xs">Wellness</span>
                         </div>
                     </div>
                 </div>
@@ -29,40 +29,75 @@
             <!-- Product Narrative -->
             <div class="lg:col-span-5 flex flex-col justify-center reveal">
                 <nav class="font-mono text-[10px] text-muted-text uppercase tracking-[0.3em] mb-12">
-                    Collections / Body / The Ritual of Jing
+                    Collections / {{ $product->category }} / {{ $product->collection }}
                 </nav>
 
-                <h1 class="font-display text-7xl mb-8 leading-tight">Sleep Foaming <br><span class="text-gold italic">Shower Gel</span></h1>
+                <h1 class="font-display text-7xl mb-8 leading-tight">
+                    {{ explode(' ', $product->name)[0] }} <br>
+                    <span class="text-gold italic">{{ implode(' ', array_slice(explode(' ', $product->name), 1)) }}</span>
+                </h1>
 
                 <div class="flex items-center gap-6 mb-12">
-                    <span class="font-mono text-2xl text-warm-text">€9.90</span>
+                    <span id="base-price" data-price="{{ $product->price }}" class="font-mono text-2xl text-warm-text">{{ tenant('currency_symbol') ?? '€' }}{{ number_format($product->price, 2) }}</span>
                     <span class="h-px w-16 bg-gold/30"></span>
-                    <span class="font-accent text-[10px] text-muted-text uppercase tracking-widest">200ml / 6.7 fl.oz.</span>
+                    @if($product->variants->count() > 0)
+                        <select id="variant-selector" name="variant_id" form="add-to-cart-form" class="bg-deep-black font-mono text-[10px] text-muted-text uppercase tracking-widest outline-none border border-muted-text/20 rounded px-4 py-2 cursor-pointer focus:border-gold/50 transition-colors">
+                            @foreach($product->variants as $variant)
+                                <option value="{{ $variant->id }}" data-additional="{{ $variant->additional_price }}">
+                                    {{ $variant->value }} (+{{ tenant('currency_symbol') ?? '€' }}{{ number_format($variant->additional_price, 2) }})
+                                </option>
+                            @endforeach
+                        </select>
+                    @else
+                        <span class="font-accent text-[10px] text-muted-text uppercase tracking-widest">Standard Size</span>
+                    @endif
                 </div>
 
                 <p class="font-body text-xl text-muted-text mb-16 leading-relaxed">
-                    Transform your shower into a meaningful ceremony. This foaming shower gel combines the calming scent of Sacred Lotus and Jujube to help you find inner peace and prepare for a restful sleep.
+                    {{ $product->description }}
                 </p>
 
                 <!-- CTA -->
                 <div class="flex flex-col gap-6 mb-20">
-                    <x-button size="lg">Add to Cart</x-button>
-                    <p class="text-center font-mono text-[9px] text-muted-text uppercase tracking-widest">Free shipping on orders over €35</p>
+                    <form id="add-to-cart-form" action="{{ route('cart.add') }}" method="POST" class="ajax-cart-form">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <x-button type="submit" size="lg" class="w-full">Add to Cart</x-button>
+                    </form>
+                    <p class="text-center font-mono text-[9px] text-muted-text uppercase tracking-widest">Free shipping on orders over {{ tenant('currency_symbol') ?? '€' }}35</p>
                 </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const selector = document.getElementById('variant-selector');
+                        const priceDisplay = document.getElementById('base-price');
+                        const basePrice = parseFloat(priceDisplay.getAttribute('data-price'));
+                        const symbol = '{{ tenant("currency_symbol") ?? "€" }}';
+
+                        if (selector) {
+                            selector.addEventListener('change', () => {
+                                const selectedOption = selector.options[selector.selectedIndex];
+                                const additional = parseFloat(selectedOption.getAttribute('data-additional') || 0);
+                                const totalPrice = basePrice + additional;
+                                priceDisplay.innerText = symbol + totalPrice.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            });
+                        }
+                    });
+                </script>
 
                 <!-- Product Details Accordion-style -->
                 <div class="space-y-12 border-t border-muted-text/10 pt-12">
                     <div>
-                        <h4 class="font-accent text-[11px] text-gold uppercase tracking-[0.3em] mb-6">The Scent Profile</h4>
-                        <p class="font-body text-base text-muted-text leading-relaxed">A complex blend of Sacred Lotus—symbol of purity—and Jujube seeds, traditionally used in Chinese medicine to reduce stress and produce a calm state of mind.</p>
+                        <h4 class="font-accent text-[11px] text-gold uppercase tracking-[0.3em] mb-6">The Collection</h4>
+                        <p class="font-body text-base text-muted-text leading-relaxed">Part of {{ $product->collection }}. Designed to help you find a moment of peace and balance.</p>
                     </div>
                     <div>
                         <h4 class="font-accent text-[11px] text-gold uppercase tracking-[0.3em] mb-6">The Ritual</h4>
-                        <p class="font-body text-base text-muted-text leading-relaxed">Simply squeeze a small amount into your hand and watch the gel transform into a rich, noble foam. Close your eyes and breathe in the aroma.</p>
+                        <p class="font-body text-base text-muted-text leading-relaxed">Simply apply a small amount to your skin and let the transformative fragrance elevate your mood and soul.</p>
                     </div>
                     <div>
-                        <h4 class="font-accent text-[11px] text-gold uppercase tracking-[0.3em] mb-6">Ingredients</h4>
-                        <p class="font-mono text-[10px] text-muted-text/60 leading-relaxed uppercase">Aqua/Water, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Isopentane, Sorbitol, Isopropyl Palmitate, Parfum/Fragrance, Isobutane, Lotus Flower Extract, Jujube Seed Extract...</p>
+                        <h4 class="font-accent text-[11px] text-gold uppercase tracking-[0.3em] mb-6">Stock Availability</h4>
+                        <p class="font-mono text-[10px] text-muted-text/60 leading-relaxed uppercase">{{ $product->stock }} units currently available in this location.</p>
                     </div>
                 </div>
             </div>
@@ -74,26 +109,16 @@
                 <span class="font-accent text-gold uppercase tracking-[0.4em] text-[10px] mb-6 block">The Collection</span>
                 <h2 class="font-display text-5xl">Complete the Ritual</h2>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-                <x-product-card
-                    name="Body Cream"
-                    collection="Ritual of Jing"
-                    price="18.90"
-                    img="https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=600"
-                />
-                <x-product-card
-                    name="Scented Candle"
-                    collection="Ritual of Jing"
-                    price="24.90"
-                    img="https://images.unsplash.com/photo-1602928294704-454bd1abccc1?q=80&w=600"
-                    class="mt-12"
-                />
-                <x-product-card
-                    name="Pillow Mist"
-                    collection="Ritual of Jing"
-                    price="17.50"
-                    img="https://images.unsplash.com/photo-1590439472304-4c39677450c1?q=80&w=600"
-                />
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-12">
+                @foreach($relatedProducts as $related)
+                    <x-product-card
+                        :id="$related->id"
+                        :name="$related->name"
+                        :collection="$related->collection"
+                        :price="$related->price"
+                        :img="$related->image_url"
+                    />
+                @endforeach
             </div>
         </section>
     </div>

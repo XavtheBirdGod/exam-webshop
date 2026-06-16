@@ -21,7 +21,7 @@ class ProductService
     public function createProduct(array $data)
     {
         $product = Product::create([
-            'shop_id' => auth()->user()->shop_id,
+            'shop_id' => auth()->user()->shop->id,
             'name' => $data['name'],
             'description' => $data['description'],
             'price' => $data['price'],

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    protected $fillable = ['shop_id', 'name', 'description', 'price'];
+    protected $fillable = ['shop_id', 'name', 'collection', 'category', 'image_url', 'description', 'price', 'stock'];
 
     public function shop() {
         return $this->belongsTo(Shop::class);
